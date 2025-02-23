@@ -1,0 +1,58 @@
+name: "Xcode Cloud Dispatch"
+description: "Dispatch Xcode Cloud workflow using App Store Connect API"
+
+author: "yorifuji"
+
+branding:
+  icon: cloud
+  color: blue
+
+inputs:
+  appstore-connect-token:
+    description: "App Store Connect API token"
+    required: true
+  xcode-cloud-workflow-id:
+    description: "Xcode Cloud workflow ID"
+    required: true
+  git-branch-name:
+    description: "Git branch name"
+    required: true
+
+outputs:
+  buildNumber:
+    description: "The build number"
+    value: ${{ steps.xcode-cloud-dispatch.outputs.buildNumber }}
+  buildId:
+    description: "The build ID"
+    value: ${{ steps.xcode-cloud-dispatch.outputs.buildId }}
+  gitReferenceId:
+    description: "The git reference ID"
+    value: ${{ steps.xcode-cloud-dispatch.outputs.gitReferenceId }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      id: xcode-cloud-dispatch
+      env:
+        APPSTORE_CONNECT_TOKEN: ${{ inputs.appstore-connect-token }}
+        XCODE_CLOUD_WORKFLOW_ID: ${{ inputs.xcode-cloud-workflow-id }}
+        GIT_BRANCH_NAME: ${{ inputs.git-branch-name }}
+      with:
+        script: |
+          const trigger = require('./index.js');
+
+          try {
+            const result = await trigger({
+              "appstore-connect-token": process.env.APPSTORE_CONNECT_TOKEN,
+              "xcode-cloud-workflow-id": process.env.XCODE_CLOUD_WORKFLOW_ID,
+              "git-branch-name": process.env.GIT_BRANCH_NAME
+            });
+
+            core.setOutput('buildNumber', result.buildNumber);
+            core.setOutput('buildId', result.buildId);
+            core.setOutput('gitReferenceId', result.gitReferenceId);
+          } catch (error) {
+            core.setFailed(error.message);
+            throw error;
+          }

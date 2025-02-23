@@ -1,0 +1,55 @@
+name: "Xcode Cloud Dispatch Example"
+
+on:
+  workflow_dispatch:
+    inputs:
+      xcode_cloud_workflow_id:
+        description: "Xcode Cloud workflow ID to trigger"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch-xcode-cloud:
+    name: "Dispatch Xcode Cloud Build"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: "Generate App Store Connect JWT Token"
+        id: asc
+        uses: yuki0n0/action-appstoreconnect-token@v1.0
+        with:
+          issuer id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          key id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+
+      - name: "Dispatch Xcode Cloud Build"
+        id: xcode-cloud
+        uses: yorifuji/actions-xcode-cloud-dispatcher@main
+        with:
+          appstore-connect-token: ${{ steps.asc.outputs.token }}
+          xcode-cloud-workflow-id: ${{ inputs.xcode_cloud_workflow_id }}
+          git-branch-name: ${{ github.ref_name }}
+
+      - name: "Display Build Information"
+        if: success()
+        run: |
+          echo "Build Information:"
+          echo "  - Build Number: ${{ steps.xcode-cloud.outputs.buildNumber }}"
+          echo "  - Build ID: ${{ steps.xcode-cloud.outputs.buildId }}"
+          echo "  - Git Reference ID: ${{ steps.xcode-cloud.outputs.gitReferenceId }}"
+          echo "  - Branch: ${{ github.ref_name }}"
+
+      - name: "Handle Build Failure"
+        if: failure()
+        run: |
+          echo "❌ Failed to trigger Xcode Cloud build"
+          echo "Please check:"
+          echo "- App Store Connect API credentials"
+          echo "- Workflow ID and permissions"
+          echo "- Branch existence and access"
+          exit 1
