@@ -7,13 +7,17 @@ on:
         description: "Xcode Cloud workflow ID to trigger"
         required: true
         type: string
+      branch-name:
+        description: "Branch name to trigger the build"
+        required: true
+        type: string
+        default: "main"
 
 permissions:
   contents: read
 
 jobs:
   dispatch-xcode-cloud:
-    name: "Dispatch Xcode Cloud Build"
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
@@ -27,13 +31,13 @@ jobs:
           key id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
 
-      - name: "Dispatch Xcode Cloud Build"
+      - name: "Dispatch Xcode Cloud Workflow"
         id: xcode-cloud
         uses: yorifuji/actions-xcode-cloud-dispatcher@main
         with:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
           xcode-cloud-workflow-id: ${{ inputs.xcode-cloud-workflow-id }}
-          git-branch-name: ${{ github.ref_name }}
+          git-branch-name: ${{ inputs.branch-name }}
 
       - name: "Display Build Information"
         if: success()
