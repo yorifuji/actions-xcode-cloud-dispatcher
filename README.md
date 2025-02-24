@@ -12,7 +12,7 @@ GitHub Action to dispatch builds in Xcode Cloud using the App Store Connect API.
 
    - Go to App Store Connect > Users and Access > Keys
    - Click the "+" button to create a new key
-   - Select "Admin" or "App Manager" role
+   - Select "Admin" or "App Manager" or "Developer" role
    - Download and safely store your API key file
 
 2. Add the following secrets to your repository:
