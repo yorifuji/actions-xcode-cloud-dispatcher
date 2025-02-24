@@ -1,10 +1,6 @@
-# GitHub Actions for Xcode Cloud Dispatch
+# Actions Xcode Cloud Dispatcher
 
-GitHub Action to dispatch builds in Xcode Cloud using the App Store Connect API.
-
-## Features
-
-- 🚀 Dispatch Xcode Cloud builds from GitHub Actions
+GitHub Actions for dispatch builds in Xcode Cloud using the App Store Connect API.
 
 ## Setup Guide
 
@@ -31,7 +27,7 @@ name: "Xcode Cloud Dispatch"
 on:
   workflow_dispatch:
     inputs:
-      xcode_cloud_workflow_id:
+      xcode-cloud-workflow-id:
         description: "Xcode Cloud workflow ID to trigger"
         required: true
         type: string
@@ -54,7 +50,7 @@ jobs:
         uses: yorifuji/actions-xcode-cloud-dispatcher@v1
         with:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
-          xcode-cloud-workflow-id: ${{ inputs.xcode_cloud_workflow_id }}
+          xcode-cloud-workflow-id: ${{ inputs.xcode-cloud-workflow-id }}
           git-branch-name: ${{ github.ref_name }}
 ```
 
