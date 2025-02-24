@@ -1,4 +1,4 @@
-name: "Xcode Cloud Dispatch"
+name: "Xcode Cloud Dispatcher"
 description: "Dispatch Xcode Cloud workflow using App Store Connect API"
 
 author: "yorifuji"

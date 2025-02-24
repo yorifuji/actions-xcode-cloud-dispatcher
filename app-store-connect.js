@@ -18,13 +18,6 @@ class AppStoreConnect {
       headers: this.createHeaders(),
     });
 
-    if (process.env.ACTIONS_STEP_DEBUG === "true") {
-      console.log(`🔍 Debug: ${options.debugContext || "API"} Response:`, {
-        status: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-    }
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -34,25 +27,16 @@ class AppStoreConnect {
         data,
       };
 
-      let errorMessage;
-      switch (error.status) {
-        case 401:
-          errorMessage = "Authentication failed. Please check your API token.";
-          break;
-        case 403:
-          errorMessage = "Authorization failed. Please check your permissions.";
-          break;
-        case 404:
-          errorMessage = `${options.errorContext || "Resource"} not found.`;
-          break;
-        case 409:
-          errorMessage =
-            "Conflict occurred. The request conflicts with another request or the current state.";
-          break;
-        default:
-          errorMessage = `API request failed: ${error.statusText}`;
-      }
+      const errorMessages = {
+        401: "Authentication failed. Please check your API token",
+        403: "Authorization failed. Please check your permissions",
+        404: `${options.errorContext || "Resource"} not found`,
+        409: "Conflict occurred. The request conflicts with another request or the current state",
+      };
 
+      const errorMessage =
+        errorMessages[error.status] ||
+        `API request failed: ${error.statusText}`;
       throw new Error(errorMessage);
     }
 
@@ -66,15 +50,16 @@ class AppStoreConnect {
     const data = await this.request(
       `/scmRepositories/${repoId}/gitReferences`,
       {
-        debugContext: "Git References",
         errorContext: "Git reference",
       }
     );
 
+    const canonicalBranchName = `refs/heads/${branchName}`;
     const reference = data.data.find(
       (ref) =>
-        ref.attributes.name === branchName ||
-        ref.attributes.name === `refs/heads/${branchName}`
+        ref?.attributes?.kind === "BRANCH" &&
+        (ref.attributes.name === branchName ||
+          ref.attributes.canonicalName === canonicalBranchName)
     );
 
     if (!reference) {
@@ -108,7 +93,6 @@ class AppStoreConnect {
     const data = await this.request("/ciBuildRuns", {
       method: "POST",
       body: JSON.stringify(body),
-      debugContext: "Build",
       errorContext: "Build",
     });
 
@@ -124,7 +108,6 @@ class AppStoreConnect {
     const repoData = await this.request(
       `/ciWorkflows/${workflowId}/repository`,
       {
-        debugContext: "Workflow Repository",
         errorContext: "Workflow Repository",
       }
     );
