@@ -1,4 +1,4 @@
-# Actions Xcode Cloud Dispatcher
+# Xcode Cloud Dispatcher
 
 GitHub Actions to run Xcode Cloud workflows using the App Store Connect API.
 
@@ -51,7 +51,7 @@ To dispatch a specific workflow in Xcode Cloud, you'll need its workflow ID. Thi
 #### Example Workflow
 
 ```yaml
-name: "Xcode Cloud Dispatch"
+name: "Xcode Cloud Dispatch Example"
 
 on:
   workflow_dispatch:
@@ -60,6 +60,14 @@ on:
         description: "Xcode Cloud workflow ID to trigger"
         required: true
         type: string
+      branch-name:
+        description: "Branch name to trigger the build"
+        required: true
+        type: string
+        default: "main"
+
+permissions:
+  contents: read
 
 jobs:
   dispatch-xcode-cloud:
@@ -82,7 +90,7 @@ jobs:
         with:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
           xcode-cloud-workflow-id: ${{ inputs.xcode-cloud-workflow-id }}
-          git-branch-name: ${{ github.ref_name }}
+          git-branch-name: ${{ inputs.branch-name }}
 ```
 
 ## Reference
