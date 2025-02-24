@@ -18,13 +18,6 @@ class AppStoreConnect {
       headers: this.createHeaders(),
     });
 
-    if (process.env.ACTIONS_STEP_DEBUG === "true") {
-      console.log(`🔍 Debug: ${options.debugContext || "API"} Response:`, {
-        status: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-    }
-
     const data = await response.json();
 
     if (!response.ok) {
@@ -37,17 +30,17 @@ class AppStoreConnect {
       let errorMessage;
       switch (error.status) {
         case 401:
-          errorMessage = "Authentication failed. Please check your API token.";
+          errorMessage = "Authentication failed. Please check your API token";
           break;
         case 403:
-          errorMessage = "Authorization failed. Please check your permissions.";
+          errorMessage = "Authorization failed. Please check your permissions";
           break;
         case 404:
-          errorMessage = `${options.errorContext || "Resource"} not found.`;
+          errorMessage = `${options.errorContext || "Resource"} not found`;
           break;
         case 409:
           errorMessage =
-            "Conflict occurred. The request conflicts with another request or the current state.";
+            "Conflict occurred. The request conflicts with another request or the current state";
           break;
         default:
           errorMessage = `API request failed: ${error.statusText}`;
@@ -66,7 +59,6 @@ class AppStoreConnect {
     const data = await this.request(
       `/scmRepositories/${repoId}/gitReferences`,
       {
-        debugContext: "Git References",
         errorContext: "Git reference",
       }
     );
@@ -109,7 +101,6 @@ class AppStoreConnect {
     const data = await this.request("/ciBuildRuns", {
       method: "POST",
       body: JSON.stringify(body),
-      debugContext: "Build",
       errorContext: "Build",
     });
 
@@ -125,7 +116,6 @@ class AppStoreConnect {
     const repoData = await this.request(
       `/ciWorkflows/${workflowId}/repository`,
       {
-        debugContext: "Workflow Repository",
         errorContext: "Workflow Repository",
       }
     );
