@@ -27,25 +27,16 @@ class AppStoreConnect {
         data,
       };
 
-      let errorMessage;
-      switch (error.status) {
-        case 401:
-          errorMessage = "Authentication failed. Please check your API token";
-          break;
-        case 403:
-          errorMessage = "Authorization failed. Please check your permissions";
-          break;
-        case 404:
-          errorMessage = `${options.errorContext || "Resource"} not found`;
-          break;
-        case 409:
-          errorMessage =
-            "Conflict occurred. The request conflicts with another request or the current state";
-          break;
-        default:
-          errorMessage = `API request failed: ${error.statusText}`;
-      }
+      const errorMessages = {
+        401: "Authentication failed. Please check your API token",
+        403: "Authorization failed. Please check your permissions",
+        404: `${options.errorContext || "Resource"} not found`,
+        409: "Conflict occurred. The request conflicts with another request or the current state",
+      };
 
+      const errorMessage =
+        errorMessages[error.status] ||
+        `API request failed: ${error.statusText}`;
       throw new Error(errorMessage);
     }
 
