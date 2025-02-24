@@ -73,8 +73,9 @@ class AppStoreConnect {
 
     const reference = data.data.find(
       (ref) =>
-        ref.attributes.name === branchName ||
-        ref.attributes.name === `refs/heads/${branchName}`
+        ref?.attributes?.kind === "BRANCH" &&
+        (ref.attributes.name === branchName ||
+          ref.attributes.canonicalName === `refs/heads/${branchName}`)
     );
 
     if (!reference) {
