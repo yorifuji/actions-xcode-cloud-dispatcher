@@ -60,7 +60,7 @@ jobs:
 | ------------------------- | --------------------------- | -------- | -------------------------------------- |
 | `appstore-connect-token`  | App Store Connect API token | Yes      | JWT token                              |
 | `xcode-cloud-workflow-id` | Xcode Cloud workflow ID     | Yes      | "12345678-90ab-cdef-1234-567890abcdef" |
-| `git-branch-name`         | Git branch name             | Yes      | "main" or "feature/new-feature"        |
+| `git-branch-name`         | Git branch name             | Yes      | "main"                                 |
 
 ## Outputs
 
