@@ -54,11 +54,12 @@ class AppStoreConnect {
       }
     );
 
+    const canonicalBranchName = `refs/heads/${branchName}`;
     const reference = data.data.find(
       (ref) =>
         ref?.attributes?.kind === "BRANCH" &&
         (ref.attributes.name === branchName ||
-          ref.attributes.canonicalName === `refs/heads/${branchName}`)
+          ref.attributes.canonicalName === canonicalBranchName)
     );
 
     if (!reference) {
