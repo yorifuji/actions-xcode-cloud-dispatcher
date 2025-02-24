@@ -1,7 +1,13 @@
+const { Logger } = require("./logger");
+
 class AppStoreConnect {
-  constructor(baseURL, token) {
+  constructor(baseURL, token, options = {}) {
     this.baseURL = baseURL;
     this.token = token;
+    this.logger = new Logger({
+      enabled: options.verbose || false,
+      minLevel: options.logLevel || "INFO",
+    });
   }
 
   createHeaders() {
@@ -13,19 +19,30 @@ class AppStoreConnect {
 
   async request(path, options = {}) {
     const url = `${this.baseURL}${path}`;
-    const response = await fetch(url, {
+    const headers = this.createHeaders();
+    const method = options.method || "GET";
+
+    // Log request details
+    this.logger.logApiRequest(method, path, {
       ...options,
-      headers: this.createHeaders(),
+      headers,
     });
 
-    if (process.env.ACTIONS_STEP_DEBUG === "true") {
-      console.log(`🔍 Debug: ${options.debugContext || "API"} Response:`, {
-        status: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
-      });
-    }
+    const startTime = Date.now();
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    // Log response headers
+    this.logger.logApiResponse(method, path, response, duration);
 
     const data = await response.json();
+
+    // Log response body
+    this.logger.logApiResponseBody(data);
 
     if (!response.ok) {
       const error = {
@@ -53,6 +70,17 @@ class AppStoreConnect {
           errorMessage = `API request failed: ${error.statusText}`;
       }
 
+      this.logger.logApiError(
+        {
+          message: errorMessage,
+          ...error,
+        },
+        {
+          path,
+          method,
+          context: options.errorContext,
+        }
+      );
       throw new Error(errorMessage);
     }
 

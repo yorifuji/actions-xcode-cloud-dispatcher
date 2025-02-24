@@ -1,7 +1,13 @@
 const { BASE_URL, REQUIRED_PARAMETERS } = require("./constants");
 const AppStoreConnect = require("./app-store-connect");
+const { Logger } = require("./logger");
 
 module.exports = async function trigger(params) {
+  const logger = new Logger({
+    enabled: params.verbose || false,
+    minLevel: params.logLevel || "INFO",
+  });
+
   try {
     // Validate required parameters
     for (const param of REQUIRED_PARAMETERS) {
@@ -12,20 +18,24 @@ module.exports = async function trigger(params) {
 
     const client = new AppStoreConnect(
       BASE_URL,
-      params["appstore-connect-token"]
+      params["appstore-connect-token"],
+      {
+        verbose: params.verbose || false,
+        logLevel: params.logLevel,
+      }
     );
 
-    console.log("🔍 Getting workflow information...");
+    logger.info("🔍 Getting workflow information...");
     const workflowInfo = await client.getWorkflow(
       params["xcode-cloud-workflow-id"]
     );
 
-    console.log("📦 Using repository:", {
+    logger.info("📦 Using repository", {
       name: workflowInfo.repository.name,
       owner: workflowInfo.repository.owner,
     });
 
-    console.log(
+    logger.info(
       `🔍 Finding git reference for branch '${params["git-branch-name"]}'...`
     );
     const referenceId = await client.getGitReference(
@@ -33,13 +43,13 @@ module.exports = async function trigger(params) {
       params["git-branch-name"]
     );
 
-    console.log("🚀 Starting Xcode Cloud build...");
+    logger.info("🚀 Starting Xcode Cloud build...");
     const { id: buildId, number: buildNumber } = await client.createBuild(
       params["xcode-cloud-workflow-id"],
       referenceId
     );
 
-    console.log("✅ Build successfully triggered:", {
+    logger.info("✅ Build successfully triggered", {
       buildNumber,
       repository: workflowInfo.repository.name,
       branch: params["git-branch-name"],
@@ -51,7 +61,13 @@ module.exports = async function trigger(params) {
       gitReferenceId: referenceId,
     };
   } catch (error) {
-    console.error("❌ Error:", error.message);
+    logger.error("❌ Build trigger failed", {
+      error: error.message,
+      params: {
+        ...params,
+        "appstore-connect-token": "[REDACTED]",
+      },
+    });
     throw error;
   }
 };
