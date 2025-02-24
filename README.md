@@ -2,24 +2,53 @@
 
 GitHub Actions to run Xcode Cloud workflows using the App Store Connect API.
 
-## Setup Guide
+## How to Use
 
-1. Create App Store Connect API key:
+### 1. Generate JWT Token in Workflow
 
-   - Go to App Store Connect > Users and Access > Keys
-   - Click the "+" button to create a new key
-   - Select "Admin" or "App Manager" or "Developer" role
-   - Download and safely store your API key file
+This action requires a JWT token to authenticate with the App Store Connect API. Here's an example using [yuki0n0/action-appstoreconnect-token](https://github.com/yuki0n0/action-appstoreconnect-token) to generate the token:
 
-2. Add the following secrets to your repository:
+```yaml
+- name: "Generate App Store Connect JWT Token"
+  id: asc
+  uses: yuki0n0/action-appstoreconnect-token@v1.0
+  with:
+    issuer id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+    key id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+    key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+```
 
-   - Go to your repository Settings > Secrets and variables > Actions
-   - Add the following secrets:
-     - `APP_STORE_CONNECT_ISSUER_ID`: Your App Store Connect API key issuer ID
-     - `APP_STORE_CONNECT_KEY_ID`: Your App Store Connect API key ID
-     - `APP_STORE_CONNECT_PRIVATE_KEY`: Your App Store Connect API private key (entire contents of the .p8 file)
+Required secrets:
 
-3. Create a workflow file (e.g., `.github/workflows/xcode-cloud-dispatch.yml`):
+| Secret Name                     | Description                                             |
+| ------------------------------- | ------------------------------------------------------- |
+| `APP_STORE_CONNECT_ISSUER_ID`   | App Store Connect API Issuer ID                         |
+| `APP_STORE_CONNECT_KEY_ID`      | App Store Connect API key ID                            |
+| `APP_STORE_CONNECT_PRIVATE_KEY` | App Store Connect API private key (contents of p8 file) |
+
+To get these values:
+
+1. Go to App Store Connect > Users and Access > Keys
+2. Create a new key with "Admin" or "App Manager" or "Developer" role
+3. Save the key information and .p8 file
+
+The generated token will be used to authenticate the Xcode Cloud Dispatcher action.
+
+### 2. Use Xcode Cloud Dispatcher Action
+
+Once you have the JWT token generation step in your workflow, you can use this action to dispatch Xcode Cloud workflows.
+
+#### Get Xcode Cloud Workflow ID
+
+To dispatch a specific workflow in Xcode Cloud, you'll need its workflow ID. This is a unique identifier for each workflow you've configured in App Store Connect.
+
+- Open [App Store Connect](https://appstoreconnect.apple.com)
+- Navigate to your app
+- Go to Settings > Xcode Cloud
+- Select your workflow
+- The workflow ID is in the URL: `https://appstoreconnect.apple.com/teams/{team-id}/apps/{app-id}/ci/workflows/{workflow-id}`
+
+#### Example Workflow
 
 ```yaml
 name: "Xcode Cloud Dispatch"
@@ -38,6 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Generate JWT token
       - name: "Generate App Store Connect JWT Token"
         id: asc
         uses: yuki0n0/action-appstoreconnect-token@v1.0
@@ -46,7 +76,8 @@ jobs:
           key id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
 
-      - name: "Dispatch Xcode Cloud Build"
+      # Dispatch Xcode Cloud workflow
+      - name: "Dispatch Xcode Cloud Workflow"
         uses: yorifuji/actions-xcode-cloud-dispatcher@v1
         with:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
@@ -54,7 +85,9 @@ jobs:
           git-branch-name: ${{ github.ref_name }}
 ```
 
-## Inputs
+## Reference
+
+### Action Inputs
 
 | Name                      | Description                 | Required | Example                                |
 | ------------------------- | --------------------------- | -------- | -------------------------------------- |
@@ -62,21 +95,13 @@ jobs:
 | `xcode-cloud-workflow-id` | Xcode Cloud workflow ID     | Yes      | "12345678-90ab-cdef-1234-567890abcdef" |
 | `git-branch-name`         | Git branch name             | Yes      | "main"                                 |
 
-## Outputs
+### Action Outputs
 
-| Name             | Description                                    | Example          |
-| ---------------- | ---------------------------------------------- | ---------------- |
-| `buildNumber`    | The build number of the triggered build        | "1234"           |
-| `buildId`        | The ID of the triggered build                  | "build-id-12345" |
-| `gitReferenceId` | The ID of the git reference used for the build | "git-ref-67890"  |
-
-## Finding Your Workflow ID
-
-1. Open [App Store Connect](https://appstoreconnect.apple.com)
-2. Navigate to your app
-3. Go to Settings > Xcode Cloud
-4. Select your workflow
-5. The workflow ID is in the URL: `https://appstoreconnect.apple.com/teams/{team-id}/apps/{app-id}/ci/workflows/{workflow-id}`
+| Name             | Description                                       | Example          |
+| ---------------- | ------------------------------------------------- | ---------------- |
+| `buildNumber`    | The build number of the dispatched workflow       | "1234"           |
+| `buildId`        | The ID of the dispatched workflow                 | "build-id-12345" |
+| `gitReferenceId` | The ID of the git reference used for the workflow | "git-ref-67890"  |
 
 ## License
 
