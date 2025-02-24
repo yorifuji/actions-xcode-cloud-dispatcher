@@ -1,6 +1,6 @@
 # Actions Xcode Cloud Dispatcher
 
-GitHub Actions for dispatch builds in Xcode Cloud using the App Store Connect API.
+GitHub Actions to run Xcode Cloud workflows using the App Store Connect API.
 
 ## Setup Guide
 
