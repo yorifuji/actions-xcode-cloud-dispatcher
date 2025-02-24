@@ -1,5 +1,5 @@
 name: "Xcode Cloud Dispatcher"
-description: "Dispatch Xcode Cloud workflow using App Store Connect API"
+description: "GitHub Actions to run Xcode Cloud workflows using the App Store Connect API"
 
 author: "yorifuji"
 
