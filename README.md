@@ -101,6 +101,8 @@ jobs:
 
 This example shows how to trigger Xcode Cloud workflows using slash commands in pull request comments. When a user comments `/deploy` on a PR, it will trigger workflow for that PR's branch.
 
+<img width="429" alt="image" src="https://github.com/user-attachments/assets/c0f18787-ee69-4889-9a57-1d28cc97f148" />
+
 ```yaml
 name: Dispatch slash command
 
