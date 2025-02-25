@@ -40,7 +40,9 @@ runs:
         GIT_BRANCH_NAME: ${{ inputs.git-branch-name }}
       with:
         script: |
-          const trigger = require('./index.js');
+          const path = require('path');
+          const actionPath = process.env.GITHUB_ACTION_PATH;
+          const trigger = require(path.join(actionPath, 'index.js'));
 
           try {
             const result = await trigger({

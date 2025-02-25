@@ -2,7 +2,7 @@
 
 GitHub Actions to run Xcode Cloud workflows using the App Store Connect API.
 
-## How to Use
+## Setup
 
 ### 1. Generate JWT Token in Workflow
 
@@ -48,10 +48,14 @@ To dispatch a specific workflow in Xcode Cloud, you'll need its workflow ID. Thi
 - Select your workflow
 - The workflow ID is in the URL: `https://appstoreconnect.apple.com/teams/{team-id}/apps/{app-id}/ci/workflows/{workflow-id}`
 
-#### Example Workflow
+## Example Workflows
+
+### Manual Dispatch Workflow Example
+
+This example shows how to trigger Xcode Cloud workflows manually.
 
 ```yaml
-name: "Xcode Cloud Dispatch Example"
+name: "Manual Dispatch Workflow Example"
 
 on:
   workflow_dispatch:
@@ -61,7 +65,7 @@ on:
         required: true
         type: string
       branch-name:
-        description: "Branch name to trigger the build"
+        description: "Branch name to trigger the workflow"
         required: true
         type: string
         default: "main"
@@ -91,6 +95,93 @@ jobs:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
           xcode-cloud-workflow-id: ${{ inputs.xcode-cloud-workflow-id }}
           git-branch-name: ${{ inputs.branch-name }}
+```
+
+### PR Comment Slash Command Workflow Example
+
+This example shows how to trigger Xcode Cloud workflows using slash commands in pull request comments. When a user comments `/deploy` on a PR, it will trigger workflow for that PR's branch.
+
+<img width="429" alt="image" src="https://github.com/user-attachments/assets/c0f18787-ee69-4889-9a57-1d28cc97f148" />
+
+```yaml
+name: Dispatch slash command
+
+run-name: Dispatch slash command
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  dispatcher:
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      command: ${{ steps.dispatch.outputs.command }}
+    steps:
+      - id: dispatch
+        name: "Parse slash command from comment"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // List of supported slash commands
+            const supportedCommands = ['deploy'];
+
+            // Detect command from comment body
+            const detectedCommand = supportedCommands.find(cmd =>
+              context.payload.comment.body.startsWith(`/${cmd}`)
+            );
+
+            if (detectedCommand) {
+              core.setOutput('command', detectedCommand);
+            } else {
+              core.setOutput('command', 'Unknown command');
+            }
+
+  deploy:
+    needs: dispatcher
+    if: ${{ needs.dispatcher.outputs.command == 'deploy' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Get branch from Issue number"
+        id: issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Get PR info and extract branch name
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            if (!pullRequest.head.ref) {
+              core.setFailed('Failed to get branch name from pull request');
+              return;
+            }
+            core.setOutput('branch-name', pullRequest.head.ref);
+
+      - name: "Generate App Store Connect JWT Token"
+        id: asc
+        uses: yuki0n0/action-appstoreconnect-token@v1.0
+        with:
+          issuer id: ${{ secrets.APPLE_API_ISSUER_ID }}
+          key id: ${{ secrets.APPLE_API_KEY_ID }}
+          key: ${{ secrets.APPLE_API_AUTHKEY_P8 }}
+
+      - name: "Dispatch Xcode Cloud Workflow"
+        uses: yorifuji/actions-xcode-cloud-dispatcher@v1
+        with:
+          appstore-connect-token: ${{ steps.asc.outputs.token }}
+          xcode-cloud-workflow-id: ${{ vars.XCODE_CLOUD_WORKFLOW_ID }}
+          git-branch-name: ${{ steps.issue.outputs.branch-name }}
 ```
 
 ## Reference
