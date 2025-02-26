@@ -47,24 +47,54 @@ class AppStoreConnect {
     if (!repoId) throw new Error("Repository ID is required");
     if (!branchName) throw new Error("Branch name is required");
 
-    const data = await this.request(
-      `/scmRepositories/${repoId}/gitReferences`,
+    let allReferences = [];
+    let nextUrl = `/scmRepositories/${repoId}/gitReferences?${new URLSearchParams(
       {
-        errorContext: "Git reference",
+        limit: "200",
       }
-    );
+    ).toString()}`;
 
-    const canonicalBranchName = `refs/heads/${branchName}`;
-    const reference = data.data.find(
+    while (nextUrl) {
+      const data = await this.request(nextUrl, {
+        errorContext: "Git reference",
+      });
+
+      allReferences = allReferences.concat(data.data);
+
+      // Check if there are more pages
+      if (data.links && data.links.next) {
+        const nextFullUrl = data.links.next;
+        // Extract the path and query parameters from the full URL
+        const url = new URL(nextFullUrl);
+        nextUrl =
+          url.pathname.replace("https://api.appstoreconnect.apple.com/v1", "") +
+          url.search;
+      } else {
+        nextUrl = null;
+      }
+    }
+
+    // Find the matching branch
+    const reference = allReferences.find(
       (ref) =>
         ref?.attributes?.kind === "BRANCH" &&
+        !ref?.attributes?.isDeleted &&
         (ref.attributes.name === branchName ||
-          ref.attributes.canonicalName === canonicalBranchName)
+          ref.attributes.canonicalName === `refs/heads/${branchName}`)
     );
 
     if (!reference) {
+      const availableBranches = allReferences
+        .filter(
+          (ref) => ref.attributes.kind === "BRANCH" && !ref.attributes.isDeleted
+        )
+        .map((ref) => ref.attributes.name)
+        .sort();
+
       throw new Error(
-        `No matching git reference found for branch '${branchName}'`
+        `No matching git reference found for branch '${branchName}'. Available branches: ${availableBranches.join(
+          ", "
+        )}`
       );
     }
 

@@ -118,9 +118,8 @@ permissions:
 
 jobs:
   dispatcher:
-    if: ${{ github.event.issue.pull_request }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    if: ${{ github.event.issue.pull_request && contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association) }}
+    runs-on: ubuntu-latest
     outputs:
       command: ${{ steps.dispatch.outputs.command }}
     steps:
@@ -130,24 +129,18 @@ jobs:
         with:
           script: |
             // List of supported slash commands
-            const supportedCommands = ['deploy'];
+            const supportedCommands = ['deploy'].sort((a, b) => b.length - a.length);
 
             // Detect command from comment body
-            const detectedCommand = supportedCommands.find(cmd =>
+            const command = supportedCommands.find(cmd =>
               context.payload.comment.body.startsWith(`/${cmd}`)
             );
-
-            if (detectedCommand) {
-              core.setOutput('command', detectedCommand);
-            } else {
-              core.setOutput('command', 'Unknown command');
-            }
+            core.setOutput('command', command || '')
 
   deploy:
     needs: dispatcher
     if: ${{ needs.dispatcher.outputs.command == 'deploy' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
