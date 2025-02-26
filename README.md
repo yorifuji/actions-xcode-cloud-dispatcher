@@ -118,7 +118,7 @@ permissions:
 
 jobs:
   dispatcher:
-    if: ${{ github.event.issue.pull_request }}
+    if: ${{ github.event.issue.pull_request && contains(fromJson('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association) }}
     runs-on: ubuntu-latest
     outputs:
       command: ${{ steps.dispatch.outputs.command }}
