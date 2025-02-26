@@ -130,7 +130,7 @@ jobs:
         with:
           script: |
             // List of supported slash commands
-            const supportedCommands = ['deploy'];
+            const supportedCommands = ['deploy'].sort((a, b) => b.length - a.length);
 
             // Detect command from comment body
             const detectedCommand = supportedCommands.find(cmd =>
