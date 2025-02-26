@@ -132,15 +132,10 @@ jobs:
             const supportedCommands = ['deploy'].sort((a, b) => b.length - a.length);
 
             // Detect command from comment body
-            const detectedCommand = supportedCommands.find(cmd =>
+            const command = supportedCommands.find(cmd =>
               context.payload.comment.body.startsWith(`/${cmd}`)
             );
-
-            if (detectedCommand) {
-              core.setOutput('command', detectedCommand);
-            } else {
-              core.setOutput('command', 'Unknown command');
-            }
+            core.setOutput('command', command || '')
 
   deploy:
     needs: dispatcher
