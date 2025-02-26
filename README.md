@@ -119,8 +119,7 @@ permissions:
 jobs:
   dispatcher:
     if: ${{ github.event.issue.pull_request }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
     outputs:
       command: ${{ steps.dispatch.outputs.command }}
     steps:
@@ -146,8 +145,7 @@ jobs:
   deploy:
     needs: dispatcher
     if: ${{ needs.dispatcher.outputs.command == 'deploy' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
