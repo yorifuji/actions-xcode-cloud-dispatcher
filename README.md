@@ -122,6 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       command: ${{ steps.dispatch.outputs.command }}
+      branch: ${{ steps.dispatch.outputs.branch }}
     steps:
       - id: dispatch
         name: "Parse slash command from comment"
@@ -137,18 +138,6 @@ jobs:
             );
             core.setOutput('command', command || '')
 
-  deploy:
-    needs: dispatcher
-    if: ${{ needs.dispatcher.outputs.command == 'deploy' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Get branch from Issue number"
-        id: issue
-        uses: actions/github-script@v7
-        with:
-          script: |
             // Get PR info and extract branch name
             const { data: pullRequest } = await github.rest.pulls.get({
               owner: context.repo.owner,
@@ -159,7 +148,14 @@ jobs:
               core.setFailed('Failed to get branch name from pull request');
               return;
             }
-            core.setOutput('branch-name', pullRequest.head.ref);
+            core.setOutput('branch', pullRequest.head.ref);
+
+  deploy:
+    needs: dispatcher
+    if: ${{ needs.dispatcher.outputs.command == 'deploy' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: "Generate App Store Connect JWT Token"
         id: asc
@@ -174,7 +170,7 @@ jobs:
         with:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
           xcode-cloud-workflow-id: ${{ vars.XCODE_CLOUD_WORKFLOW_ID }}
-          git-branch-name: ${{ steps.issue.outputs.branch-name }}
+          git-branch-name: ${{ needs.dispatcher.outputs.branch }}
 ```
 
 ## Reference
