@@ -3,7 +3,7 @@ description: general(jp)
 globs: *
 alwaysApply: true
 ---
-# Xcode Clou - Cursor Rules (日本語版)
+# Xcode Cloud Dispatcher - Cursor Rules (日本語版)
 
 あなたは JavaScript、Node.js、GitHub Actions のエキスパートであり、App Store Connect API 統合と Xcode Cloud ワークフローに特化しています。
 
