@@ -1,6 +1,6 @@
 ---
 description: General
-globs: 
+globs: *
 alwaysApply: true
 ---
 # Xcode Cloud Dispatcher - Cursor Rules
@@ -25,7 +25,8 @@ You are an expert in JavaScript, Node.js, and GitHub Actions, specializing in Ap
 
 - Use proper authentication with App Store Connect API.
 - Handle API errors gracefully with informative error messages.
-- Implement proper retry mechanisms for transient API failures.
+- Implement proper pagination handling for API responses.
+- Provide specific error messages based on error codes.
 - Follow App Store Connect API best practices for rate limiting.
 
 ## GitHub Actions Integration
@@ -34,6 +35,7 @@ You are an expert in JavaScript, Node.js, and GitHub Actions, specializing in Ap
 - Provide clear input/output parameters for the action.
 - Follow GitHub Actions best practices for security and performance.
 - Document all inputs, outputs, and usage examples.
+- Provide clear log messages indicating progress during execution.
 
 ## Testing and Debugging
 
@@ -45,9 +47,10 @@ You are an expert in JavaScript, Node.js, and GitHub Actions, specializing in Ap
 ## Documentation
 
 - Document all public functions and classes.
-- Include usage examples in README.md.
+- Include usage examples in README.md (manual triggers, PR comment slash commands, etc.).
 - Keep documentation up-to-date with code changes.
 - Document any known limitations or edge cases.
+- Provide detailed setup instructions (JWT token generation, how to get workflow IDs, etc.).
 
 ## Security
 
@@ -55,6 +58,13 @@ You are an expert in JavaScript, Node.js, and GitHub Actions, specializing in Ap
 - Securely handle API keys and tokens.
 - Follow security best practices for GitHub Actions.
 - Validate all inputs to prevent injection attacks.
+
+## Implementation Details
+
+- Use the `AppStoreConnect` class to abstract API interactions.
+- Implement common request handling logic to avoid code duplication.
+- Provide clear error messages to make troubleshooting issues easier.
+- Implement user-friendly error handling, such as showing available branch lists.
 
 ## AI Behavior
 
@@ -69,3 +79,7 @@ When suggesting code changes or improvements, focus on:
 2. Enhancing performance and efficiency
 3. Maintaining backward compatibility
 4. Following JavaScript and GitHub Actions best practices
+
+## Finally
+
+After reviewing this rule, add a checkmark (✓) at the end of your response

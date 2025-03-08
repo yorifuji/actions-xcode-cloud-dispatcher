@@ -1,12 +1,9 @@
 ---
 description: general(jp)
-globs: 
+globs: *
 alwaysApply: true
 ---
-
-Same rules [general.mdc](mdc:.cursor/rules/general.mdc)
-
-# Xcode Cloud Dispatcher - Cursor Rules (日本語版)
+# Xcode Clou - Cursor Rules (日本語版)
 
 あなたは JavaScript、Node.js、GitHub Actions のエキスパートであり、App Store Connect API 統合と Xcode Cloud ワークフローに特化しています。
 
@@ -28,7 +25,8 @@ Same rules [general.mdc](mdc:.cursor/rules/general.mdc)
 
 - App Store Connect API との適切な認証を使用します。
 - 情報量の多いエラーメッセージで API エラーを適切に処理します。
-- 一時的な API 障害に対する適切な再試行メカニズムを実装します。
+- API レスポンスのページネーション処理を適切に実装します。
+- エラーコードに応じた具体的なエラーメッセージを提供します。
 - レート制限に関する App Store Connect API のベストプラクティスに従います。
 
 ## GitHub Actions 統合
@@ -37,6 +35,7 @@ Same rules [general.mdc](mdc:.cursor/rules/general.mdc)
 - アクションの入力/出力パラメータを明確に提供します。
 - セキュリティとパフォーマンスに関する GitHub Actions のベストプラクティスに従います。
 - すべての入力、出力、使用例をドキュメント化します。
+- 実行中の進捗状況を示す明確なログメッセージを提供します。
 
 ## テストとデバッグ
 
@@ -48,9 +47,10 @@ Same rules [general.mdc](mdc:.cursor/rules/general.mdc)
 ## ドキュメント
 
 - すべての公開関数とクラスをドキュメント化します。
-- README.md に使用例を含めます。
+- README.md に使用例を含めます（手動トリガー、PR コメントスラッシュコマンドなど）。
 - コードの変更に合わせてドキュメントを最新の状態に保ちます。
 - 既知の制限事項やエッジケースをドキュメント化します。
+- 設定手順を詳細に説明します（JWT トークン生成、ワークフロー ID の取得方法など）。
 
 ## セキュリティ
 
@@ -58,6 +58,13 @@ Same rules [general.mdc](mdc:.cursor/rules/general.mdc)
 - API キーとトークンを安全に取り扱います。
 - GitHub Actions のセキュリティベストプラクティスに従います。
 - インジェクション攻撃を防ぐためにすべての入力を検証します。
+
+## 実装の詳細
+
+- `AppStoreConnect` クラスを使用して API 連携を抽象化します。
+- 共通のリクエスト処理ロジックを実装して、コードの重複を避けます。
+- 明確なエラーメッセージを提供し、問題のトラブルシューティングを容易にします。
+- 利用可能なブランチのリストを表示するなど、ユーザーフレンドリーなエラー処理を実装します。
 
 ## AI の振る舞い
 
@@ -72,3 +79,7 @@ Same rules [general.mdc](mdc:.cursor/rules/general.mdc)
 2. パフォーマンスと効率性の強化
 3. 後方互換性の維持
 4. JavaScript と GitHub Actions のベストプラクティスの遵守
+
+## 最後
+
+- このルールを確認したらレスポンスの末尾に「✅」をつけて
