@@ -1,7 +1,13 @@
+const { Logger } = require("./logger");
+
 class AppStoreConnect {
-  constructor(baseURL, token) {
+  constructor(baseURL, token, options = {}) {
     this.baseURL = baseURL;
     this.token = token;
+    this.logger = new Logger({
+      enabled: options.verbose || false,
+      minLevel: options.logLevel || "INFO"
+    });
   }
 
   createHeaders() {
@@ -13,12 +19,20 @@ class AppStoreConnect {
 
   async request(path, options = {}) {
     const url = `${this.baseURL}${path}`;
+    const method = options.method || "GET";
+    
+    // Log request details
+    this.logger.logApiRequest(method, path, options);
+    
     const response = await fetch(url, {
       ...options,
       headers: this.createHeaders(),
     });
 
     const data = await response.json();
+    
+    // Log response details
+    this.logger.logApiResponse(response.status, data);
 
     if (!response.ok) {
       const error = {
@@ -47,6 +61,8 @@ class AppStoreConnect {
     if (!repoId) throw new Error("Repository ID is required");
     if (!branchName) throw new Error("Branch name is required");
 
+    this.logger.info(`Searching for git reference with branch name: ${branchName}`);
+    
     let allReferences = [];
     let nextUrl = `/scmRepositories/${repoId}/gitReferences?${new URLSearchParams(
       {
@@ -105,6 +121,9 @@ class AppStoreConnect {
     if (!workflowId) throw new Error("Workflow ID is required");
     if (!referenceId) throw new Error("Git reference ID is required");
 
+    this.logger.info(`Creating build for workflow: ${workflowId}`);
+    this.logger.info(`Using git reference: ${referenceId}`);
+    
     const body = {
       data: {
         type: "ciBuildRuns",
@@ -135,6 +154,8 @@ class AppStoreConnect {
   async getWorkflow(workflowId) {
     if (!workflowId) throw new Error("Workflow ID is required");
 
+    this.logger.info(`Getting workflow information: ${workflowId}`);
+    
     const repoData = await this.request(
       `/ciWorkflows/${workflowId}/repository`,
       {
