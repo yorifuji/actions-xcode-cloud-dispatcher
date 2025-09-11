@@ -1,5 +1,6 @@
 const { BASE_URL, REQUIRED_PARAMETERS } = require("./constants");
 const AppStoreConnect = require("./app-store-connect");
+const { Logger } = require("./logger");
 
 module.exports = async function trigger(params) {
   try {
@@ -10,9 +11,12 @@ module.exports = async function trigger(params) {
       }
     }
 
+    const verbose = params["verbose"] === "true";
+    
     const client = new AppStoreConnect(
       BASE_URL,
-      params["appstore-connect-token"]
+      params["appstore-connect-token"],
+      { verbose }
     );
 
     console.log("🔍 Getting workflow information...");

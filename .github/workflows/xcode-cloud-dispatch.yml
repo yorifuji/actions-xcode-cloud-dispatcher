@@ -12,6 +12,11 @@ on:
         required: true
         type: string
         default: "main"
+      verbose:
+        description: "Enable verbose logging mode"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -33,11 +38,12 @@ jobs:
 
       - name: "Dispatch Xcode Cloud Workflow"
         id: xcode-cloud
-        uses: yorifuji/actions-xcode-cloud-dispatcher@main
+        uses: ./
         with:
           appstore-connect-token: ${{ steps.asc.outputs.token }}
           xcode-cloud-workflow-id: ${{ inputs.xcode-cloud-workflow-id }}
           git-branch-name: ${{ inputs.branch-name }}
+          verbose: ${{ inputs.verbose }}
 
       - name: "Display Build Information"
         if: success()

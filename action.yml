@@ -17,6 +17,10 @@ inputs:
   git-branch-name:
     description: "Git branch name"
     required: true
+  verbose:
+    description: "Enable verbose logging mode"
+    required: false
+    default: "false"
 
 outputs:
   buildNumber:
@@ -38,6 +42,7 @@ runs:
         APPSTORE_CONNECT_TOKEN: ${{ inputs.appstore-connect-token }}
         XCODE_CLOUD_WORKFLOW_ID: ${{ inputs.xcode-cloud-workflow-id }}
         GIT_BRANCH_NAME: ${{ inputs.git-branch-name }}
+        VERBOSE: ${{ inputs.verbose }}
       with:
         script: |
           const path = require('path');
@@ -48,7 +53,8 @@ runs:
             const result = await trigger({
               "appstore-connect-token": process.env.APPSTORE_CONNECT_TOKEN,
               "xcode-cloud-workflow-id": process.env.XCODE_CLOUD_WORKFLOW_ID,
-              "git-branch-name": process.env.GIT_BRANCH_NAME
+              "git-branch-name": process.env.GIT_BRANCH_NAME,
+              "verbose": process.env.VERBOSE
             });
 
             core.setOutput('buildNumber', result.buildNumber);
